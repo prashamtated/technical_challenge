@@ -20,11 +20,15 @@ Apart from the basic requirements that will allow users to access the Postfacto 
 
 1. K8s cluster of atleast 2 worker nodes. 
 2. Label both nodes with below command  
+   
+   ```
    kubectl label nodes <node1-name> hosttype=apphost
    kubectl label nodes <node2-name> hosttype=dbhost
+   ```
 3. Install ingress-controller to access Postfacto from internet by below command
+   ```
    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.2/deploy/static/provider/aws/deploy.yaml
-
+   ```
 
 ## Solution - 
 
@@ -32,14 +36,19 @@ Apart from the basic requirements that will allow users to access the Postfacto 
    then configure required SSL certificate for accessing application via https. By default its up on http.
 
 2. Install Postfacto app version 4.1.0  by  below commad
+   ```
    kubectl apply -f postfacto-4-1-0.yaml 
-   install Postfacto app version 4.2.0  by  below commad
+   ```
+   Install Postfacto app version 4.2.0  by  below commad
+   ```
    kubectl apply -f postfacto-4-2-0.yaml 
-   these both files contain defication of Deployment, statefullset, configmap , secret, pvc and services defication for both applications.
+   ```
+   These both files contain defication of Deployment, statefullset, configmap , secret, pvc and services defication for both applications.
    after this command , you have 2 versions of application running in same cluster in default namespace. 
    
 3. For data persistent in both application, PVC claim of 8GB created for redis db and postgress db in both application.
    example - 
+   ```
    volumeClaimTemplates:
     - metadata:
         name: data
@@ -49,25 +58,30 @@ Apart from the basic requirements that will allow users to access the Postfacto 
         resources:
           requests:
             storage: "8Gi"
-   
+   ```
 4. To avoid Postfacto app pods should not be deployed on the same nodes as the database and Redis, nodeSelector attibute added in deployment of Postfacto app of both version.
    example - 
+   ```
    spec:
       nodeSelector:
         hosttype: apphost
-   
+   ```
 5. install test-ingress.yaml (for testing perpose only)  and ingress.yaml for http header base routing. 
    commands : - 
+   ```
    kubectl apply -f ingress.yaml
    kubectl apply -f test-ingress.yaml
-
+   ```
 
 
 ## Post deployment steps- 
 
 1. Create an admin user so you can access the admin console
-
+   ```
    kubectl get pods
-   # Take note of the postfacto pod name
+   ```
+   Take note of the postfacto pod name,  Run below command  to add admin user 
+   ```
    kubectl exec <pod name> create-admin-user <admin-email> <admin-password> 
+   ```
    You should now have a Postfacto running in k8s, you can head to the /admin path to create a retro then to /retros/ to start using it.
