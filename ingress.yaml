@@ -1,0 +1,21 @@
+apiVersion: traefik.containo.us/v1alpha1 
+kind: IngressRoute 
+metadata: 
+  name: ingress-route 
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec: 
+  entrypoints: 
+    - web 
+    - websecure 
+  routes: 
+    - match: Headers(`X-POSTFACTO-VERSION`,`4.1.0`) 
+      kind: Rule 
+      services: 
+        - name: postfacto-4-1-0 
+          port: 80 
+    - match: Headers(`X-POSTFACTO-VERSION`,`4.2.0`) 
+      kind: Rule 
+      services: 
+        - name: postfacto-4-2-0 
+          port: 80
